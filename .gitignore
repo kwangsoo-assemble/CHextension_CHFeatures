@@ -1,0 +1,11 @@
+target/
+src/main/generated/
+libs/*.jar
+.idea/
+*.iml
+.vscode/
+.mvn/wrapper/dists/
+# 로컬 시험용 CH 실행 흔적 · 옛 소스 묶음 — 저장소에 올리지 않는다
+libs/logs/
+libs/MethodScript/
+backups/

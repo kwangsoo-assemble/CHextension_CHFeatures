@@ -1,0 +1,137 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>kr.asmbl</groupId>
+    <artifactId>chfeatures</artifactId>
+    <version>0.9.1</version>
+    <name>CHFeatures</name>
+    <description>Custom CommandHelper extension for Purpur 1.21.8 (Paper API)</description>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <showDeprecation>true</showDeprecation>
+                    <release>21</release>
+                    <compilerArgument>-XDignore.symbol.file</compilerArgument>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.4.1</version>
+                <configuration>
+                    <archive>
+                        <addMavenDescriptor>false</addMavenDescriptor>
+                        <manifest>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            <!-- 컴파일 타임 확장 어노테이션 검증 (필수) -->
+            <plugin>
+                <groupId>org.bsc.maven</groupId>
+                <artifactId>maven-processor-plugin</artifactId>
+                <version>5.0-jdk8-rc3</version>
+                <executions>
+                    <execution>
+                        <id>process</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>process</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <outputDirectory>src/main/generated</outputDirectory>
+                    <processors>
+                        <processor>com.laytonsmith.core.extensions.ExtensionAnnotationProcessor</processor>
+                    </processors>
+                </configuration>
+            </plugin>
+            <!-- 런타임 로딩 속도용 어노테이션 캐시 생성 (필수) -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                    <execution>
+                        <id>cache-annotations</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <mainClass>com.laytonsmith.PureUtilities.ClassLoading.Annotations.CacheAnnotations</mainClass>
+                    <arguments>
+                        <argument>${basedir}/target/classes</argument>
+                        <argument>${basedir}/target/classes</argument>
+                    </arguments>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <repositories>
+        <repository>
+            <id>papermc</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
+        </repository>
+        <repository>
+            <id>lumine</id>
+            <url>https://mvn.lumine.io/repository/maven-public/</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <!-- CHPaper처럼 기본(compile) 스코프 사용 — CacheAnnotations가 @api 클래스를 로드할 때
+             시그니처의 Bukkit 타입을 해석해야 하므로 provided로 두면 빌드가 깨진다.
+             (jar에 포함되진 않음 — shade 미사용) -->
+        <dependency>
+            <groupId>io.papermc.paper</groupId>
+            <artifactId>paper-api</artifactId>
+            <version>1.21.8-R0.1-SNAPSHOT</version>
+        </dependency>
+        <!-- libs/의 full jar를 install-file로 로컬 레포에 설치해서 사용 (README 참고) -->
+        <dependency>
+            <groupId>com.sk89q</groupId>
+            <artifactId>commandhelper</artifactId>
+            <version>3.3.5-SNAPSHOT</version>
+            <classifier>full</classifier>
+        </dependency>
+        <!-- 서버 설치 버전(R4.1.0)과 반드시 일치시킬 것 — 서버 MEG 업데이트 시 여기도 갱신 후 재빌드 -->
+        <dependency>
+            <groupId>com.ticxo.modelengine</groupId>
+            <artifactId>ModelEngine</artifactId>
+            <version>R4.1.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- FiguraFSB 플러그인 (libs/의 jar를 install-file로 로컬 설치, README 참고).
+             서버의 FSB 버전과 일치 유지. provided → @api 클래스 시그니처에 FSB 타입 사용 금지 -->
+        <dependency>
+            <groupId>org.figuramc.figura</groupId>
+            <artifactId>figura-fsb-spigot</artifactId>
+            <version>0.1.6</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- FiguraController (서버가 주인인 Figura 상태 · 신호) — 플러그인 저장소에서 `mvnw install` 로 로컬 설치.
+             provided → @api 클래스 시그니처에 FiguraController 타입 사용 금지 (FcBridge 에만) -->
+        <dependency>
+            <groupId>kr.asmbl</groupId>
+            <artifactId>figuracontroller</artifactId>
+            <version>0.2.0</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+</project>
