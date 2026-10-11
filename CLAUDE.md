@@ -2,7 +2,7 @@
 
 Purpur 1.21.8 서버용 CH 확장 (Java/Maven). Paper API·NMS·타 플러그인(MEG, FiguraFSB) 기능을
 MethodScript 함수/이벤트로 노출한다. 패키지 `kr.asmbl.chfeatures`.
-GitHub `kwangsoo-assemble/MCplugin_CHFeatures`(공개 · MIT · 2026-10-12) — 이 작업본을 그대로 올린다
+GitHub `kwangsoo-assemble/CHextension_CHFeatures`(공개 · MIT · 2026-10-12) — 이 작업본을 그대로 올린다
 (하네스 `projects/mc_repositories/tools/repos.py publish chfeatures` 로만 · README 한글 원본은 하네스 `readme_ko/`).
 
 ## 빌드·배포

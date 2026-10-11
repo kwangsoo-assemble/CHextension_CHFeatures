@@ -1,4 +1,4 @@
-# MCplugin_CHFeatures
+# CHextension_CHFeatures
 
 **[한국어](#한국어)** 설명은 아래에 있습니다.
 
