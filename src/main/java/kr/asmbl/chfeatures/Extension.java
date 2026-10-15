@@ -9,7 +9,7 @@ import com.laytonsmith.core.extensions.MSExtension;
 @MSExtension("CHFeatures")
 public class Extension extends AbstractExtension {
 
-	private static final Version version = new SimpleVersion(0, 9, 1);
+	private static final Version version = new SimpleVersion(0, 10, 0);
 
 	@Override
 	public Version getVersion() {

@@ -3,6 +3,15 @@
 버전은 `pom.xml` + `Extension.java`(SimpleVersion) 동기. 규칙은 CLAUDE.md의 "업데이트 규칙" 참고.
 (0.4.2 이전 이력은 소급 정리한 것 — 이후 버전부터는 업데이트 시점에 기록할 것)
 
+## 0.10.0
+
+- **추가** 이벤트 `player_stop_spectating`(player · target · target_type · target_name) — Paper `PlayerStopSpectatingEntityEvent` 래핑 · **취소 가능**
+  (`cancel()` 이면 관전 대상에 그대로 붙어 있다 — 시프트로 빠져나오기 막기). 프리필터 `player`(string match) · `target_type`(macro)
+  - 왜: 코어 `player_teleport` 로는 안 잡힌다 — 바닐라는 관전 해제를 `setCamera(self)` 로 하고 텔포를 하지 않는다(하네스 베리티_술래잡기 VR130 · 엔딩 관전 고정)
+  - 취소는 따로 구현하지 않았다 — 래퍼의 `_GetObject()` 가 Bukkit `Cancellable` 이면 CH `BukkitAbstractEventMixin.cancel` 이 `setCancelled` 를 부른다(javap 실측)
+  - ⚠ 대상이 사라지거나(나감 · 죽음) 게임 모드가 바뀔 때도 발동한다 — 스크립트가 제 손으로 풀 때(`/execute as <p> run spectate` · `set_pmode`)는 바인드 쪽에서 상태로 가린다
+  - Bukkit 리스너는 `ChfListener.onStopSpectating`(LOWEST) · 래퍼 `ChfListener.StopSpectatingEvent` — @api 클래스는 Bukkit 참조 0(json-api 안전)
+
 ## 0.9.1
 
 - **제거** 대상 `'~global'` — 옛 CH 컨트롤러 문법의 흔적. 전역은 `'global'` 하나다(FiguraController 0.2.0 과 함께 — 하네스 `projects/figura_controller` T11 레거시 정리)

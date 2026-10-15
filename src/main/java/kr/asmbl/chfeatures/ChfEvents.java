@@ -101,6 +101,81 @@ public class ChfEvents {
 		}
 	}
 
+	/**
+	 * 관전 대상에서 빠져나옴 — Paper PlayerStopSpectatingEntityEvent(취소 가능).
+	 * 시프트로 나오기를 막는 데 쓴다 · 코어 player_teleport 로는 안 잡힌다.
+	 */
+	@api
+	public static class player_stop_spectating extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "player_stop_spectating";
+		}
+
+		@Override
+		public String docs() {
+			return "{player: <string match> The spectator."
+					+ " | target_type: <macro> The entity type the player was spectating.} "
+					+ "This event is called when a spectator stops spectating an entity (sneaking out, the target"
+					+ " disappearing, a game mode change, or /spectate with no target). Cancelling keeps the player"
+					+ " attached to the target. The core player_teleport event does not fire for this. "
+					+ "{player: The spectator's name."
+					+ " | target: UUID of the entity that was spectated, or null if it is gone."
+					+ " | target_type: Its entity type, or null."
+					+ " | target_name: Its player name when the target is a player, otherwise null.} "
+					+ "{} "
+					+ "{}";
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.EXTENSION;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			if(!(e instanceof ChfListener.StopSpectatingEvent event)) {
+				return false;
+			}
+			Prefilters.match(prefilter, "player", event.getPlayerName(), PrefilterType.STRING_MATCH);
+			if(prefilter.containsKey("target_type")) {
+				if(event.getTargetType() == null) {
+					return false;
+				}
+				Prefilters.match(prefilter, "target_type", event.getTargetType(), PrefilterType.MACRO);
+			}
+			return true;
+		}
+
+		@Override
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+			ChfListener.StopSpectatingEvent event = (ChfListener.StopSpectatingEvent) e;
+			Map<String, Mixed> map = new HashMap<>();
+			Target t = Target.UNKNOWN;
+			map.put("player", new CString(event.getPlayerName(), t));
+			map.put("target", event.getTargetUuid() == null ? CNull.NULL : new CString(event.getTargetUuid(), t));
+			map.put("target_type", event.getTargetType() == null ? CNull.NULL : new CString(event.getTargetType(), t));
+			map.put("target_name", event.getTargetName() == null ? CNull.NULL : new CString(event.getTargetName(), t));
+			return map;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Mixed value, BindableEvent e) {
+			return false;
+		}
+	}
+
 	@api
 	public static class fsb_server_packet extends AbstractEvent {
 

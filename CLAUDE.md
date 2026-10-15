@@ -43,7 +43,10 @@ GitHub `kwangsoo-assemble/CHextension_CHFeatures`(공개 · MIT · 2026-10-12) �
 4. 이벤트: Bukkit Listener는 ChfListener에 격리, @api AbstractEvent(ChfEvents)는 Bukkit 참조 0,
    Extension.onStartup에서 try/catch(Throwable) 등록. json-api엔 확장 이벤트 원래 미포함(정상)
 
-## 함수 인벤토리 (0.9.1 기준, 상세 이력은 CHANGELOG.md)
+## 함수 인벤토리 (0.10.0 기준, 상세 이력은 CHANGELOG.md)
+
+- 관전: 이벤트 `player_stop_spectating`(player/target/target_type/target_name · **cancel 가능** — 시프트로 관전 대상에서 나오기 막기 ·
+  Paper PlayerStopSpectatingEntityEvent · 코어 player_teleport 로는 안 잡힘 · 0.10.0)
 
 - 가짜 발광: `chf_send_fake_glowing(entity, glowing|null, [targets])` /
   `chf_clear_fake_glowing(entity, [targets])` — 보는 사람별 발광(GlowBridge). 공유 플래그 바이트의

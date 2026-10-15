@@ -5,6 +5,9 @@ import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
 
+import com.destroystokyo.paper.event.player.PlayerStopSpectatingEntityEvent;
+
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -42,6 +45,7 @@ public class ChfListener implements Listener {
 		if(listener != null) {
 			PlayerRecipeBookSettingsChangeEvent.getHandlerList().unregister(listener);
 			PlayerQuitEvent.getHandlerList().unregister(listener);
+			PlayerStopSpectatingEntityEvent.getHandlerList().unregister(listener);
 			listener.openBooks.clear();
 		}
 	}
@@ -66,6 +70,15 @@ public class ChfListener implements Listener {
 
 		EventUtils.TriggerListener(Driver.EXTENSION, "player_recipe_book_toggle",
 				new RecipeBookToggleEvent(event, resolveGuiType(event)));
+	}
+
+	/**
+	 * 관전 대상에서 빠져나옴(시프트 · 대상 사라짐 · 게임 모드 변경 · /spectate 해제 등) — Paper 이벤트, 취소 가능.
+	 * 코어 player_teleport 로는 안 잡힌다(바닐라 setCamera(self) 는 텔포가 아니다).
+	 */
+	@EventHandler(priority = EventPriority.LOWEST)
+	public void onStopSpectating(PlayerStopSpectatingEntityEvent event) {
+		EventUtils.TriggerListener(Driver.EXTENSION, "player_stop_spectating", new StopSpectatingEvent(event));
 	}
 
 	@EventHandler
@@ -116,6 +129,42 @@ public class ChfListener implements Listener {
 			}
 		}
 		return event.getRecipeBookType().name();
+	}
+
+	/** player_stop_spectating 이벤트의 BindableEvent 래퍼 — _GetObject 가 Bukkit Cancellable 이라 CH cancel() 이 그대로 먹는다. */
+	public static class StopSpectatingEvent implements BindableEvent {
+
+		private final PlayerStopSpectatingEntityEvent event;
+
+		StopSpectatingEvent(PlayerStopSpectatingEntityEvent event) {
+			this.event = event;
+		}
+
+		public String getPlayerName() {
+			return this.event.getPlayer().getName();
+		}
+
+		/** 보던 대상 — 사라졌으면 null */
+		public String getTargetUuid() {
+			Entity target = this.event.getSpectatorTarget();
+			return target == null ? null : target.getUniqueId().toString();
+		}
+
+		public String getTargetType() {
+			Entity target = this.event.getSpectatorTarget();
+			return target == null ? null : target.getType().name();
+		}
+
+		/** 대상이 플레이어면 그 이름, 아니면 null */
+		public String getTargetName() {
+			Entity target = this.event.getSpectatorTarget();
+			return target instanceof Player p ? p.getName() : null;
+		}
+
+		@Override
+		public Object _GetObject() {
+			return this.event;
+		}
 	}
 
 	/** player_recipe_book_toggle 이벤트의 BindableEvent 래퍼. */
