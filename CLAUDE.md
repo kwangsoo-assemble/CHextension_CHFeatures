@@ -43,7 +43,11 @@ GitHub `kwangsoo-assemble/CHextension_CHFeatures`(공개 · MIT · 2026-10-12) �
 4. 이벤트: Bukkit Listener는 ChfListener에 격리, @api AbstractEvent(ChfEvents)는 Bukkit 참조 0,
    Extension.onStartup에서 try/catch(Throwable) 등록. json-api엔 확장 이벤트 원래 미포함(정상)
 
-## 함수 인벤토리 (0.10.0 기준, 상세 이력은 CHANGELOG.md)
+## 함수 인벤토리 (0.11.0 기준, 상세 이력은 CHANGELOG.md)
+
+- 다이얼로그(0.11.0 · DialogBridge 격리 · Paper 실험 API): `chf_show_dialog(player, dialog)` · `chf_close_dialog(player)` ·
+  `chf_get_dialog(player)` · 이벤트 `chf_dialog_click`(player/uuid/dialog/button/exit/current/inputs) — 버튼마다 id 필수
+  (동작 없는 바닐라 버튼은 패킷 없이 닫힌다) · ESC 는 나가기 버튼 동작을 보낸다(exit true)
 
 - 관전: 이벤트 `player_stop_spectating`(player/target/target_type/target_name · **cancel 가능** — 시프트로 관전 대상에서 나오기 막기 ·
   Paper PlayerStopSpectatingEntityEvent · 코어 player_teleport 로는 안 잡힘 · 0.10.0)

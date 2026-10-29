@@ -413,4 +413,82 @@ public class ChfEvents {
 			return false;
 		}
 	}
+
+	/**
+	 * chf_show_dialog 로 띄운 다이얼로그의 버튼 · 나가기 버튼 · ESC — DialogBridge 가 PlayerCustomClickEvent 를 받아 넘긴다.
+	 */
+	@api
+	public static class chf_dialog_click extends AbstractEvent {
+
+		@Override
+		public String getName() {
+			return "chf_dialog_click";
+		}
+
+		@Override
+		public String docs() {
+			return "{player: <string match> The clicking player."
+					+ " | dialog: <macro> The dialog id given to chf_show_dialog()."
+					+ " | button: <macro> The button id.} "
+					+ "Fires when a player presses a button of a dialog shown with chf_show_dialog(), its exit button,"
+					+ " or Escape (Escape sends the exit action). Clicks of a dialog that was already replaced still fire,"
+					+ " with current false. "
+					+ "{player: The player's name. | uuid: The player's UUID. | dialog: The dialog id."
+					+ " | button: The button id (the exit button's id for exit/Escape). | exit: True for the exit button or Escape."
+					+ " | current: False if another dialog was shown to the player after this one."
+					+ " | inputs: Associative array of text input key to the entered text.} "
+					+ "{} "
+					+ "{}";
+		}
+
+		@Override
+		public Driver driver() {
+			return Driver.EXTENSION;
+		}
+
+		@Override
+		public BindableEvent convert(CArray manualObject, Target t) {
+			return null;
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+
+		@Override
+		public boolean matches(Map<String, Mixed> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			if(!(e instanceof DialogClick event)) {
+				return false;
+			}
+			Prefilters.match(prefilter, "player", event.player, PrefilterType.STRING_MATCH);
+			Prefilters.match(prefilter, "dialog", event.dialog, PrefilterType.MACRO);
+			Prefilters.match(prefilter, "button", event.button, PrefilterType.MACRO);
+			return true;
+		}
+
+		@Override
+		public Map<String, Mixed> evaluate(BindableEvent e) throws EventException {
+			DialogClick event = (DialogClick) e;
+			Map<String, Mixed> map = new HashMap<>();
+			Target t = Target.UNKNOWN;
+			map.put("player", new CString(event.player, t));
+			map.put("uuid", new CString(event.uuid, t));
+			map.put("dialog", new CString(event.dialog, t));
+			map.put("button", new CString(event.button, t));
+			map.put("exit", CBoolean.get(event.exit));
+			map.put("current", CBoolean.get(event.current));
+			CArray inputs = CArray.GetAssociativeArray(t);
+			for(Map.Entry<String, String> in : event.inputs.entrySet()) {
+				inputs.set(in.getKey(), new CString(in.getValue(), t), t);
+			}
+			map.put("inputs", inputs);
+			return map;
+		}
+
+		@Override
+		public boolean modifyEvent(String key, Mixed value, BindableEvent e) {
+			return false;
+		}
+	}
 }

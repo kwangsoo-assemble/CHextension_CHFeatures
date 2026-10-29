@@ -3,6 +3,24 @@
 버전은 `pom.xml` + `Extension.java`(SimpleVersion) 동기. 규칙은 CLAUDE.md의 "업데이트 규칙" 참고.
 (0.4.2 이전 이력은 소급 정리한 것 — 이후 버전부터는 업데이트 시점에 기록할 것)
 
+## 0.11.0
+
+- **추가** 바닐라 다이얼로그(1.21.6+) 함수 셋 · 이벤트 하나 — Paper 다이얼로그 API(`@ApiStatus.Experimental`)는 `DialogBridge` 에만(격리) ·
+  CH 배열 → 순수 값 `DialogSpec` 은 `DialogFunctions`(@api · Bukkit 타입은 exec 안에서만) · 이벤트 값 `DialogClick`(Bukkit 참조 0)
+  - `chf_show_dialog(player, dialog)` — `dialog` = `{id(필수), type(multi · notice · confirm), title, body(줄 배열),
+    inputs([{key, label, label_visible, initial, max_length(기본 32), width}] — 글 입력만), buttons([{id(필수), label, tooltip, width}]),
+    columns(기본 2), exit({id(기본 exit), label(기본 «닫기»), width}), escape(기본 true), after(close · none · wait)}` · 열린 창은 바뀐다
+  - `chf_close_dialog(player)` · `chf_get_dialog(player)` → `{id, state(open · waiting)}` 또는 null
+  - 이벤트 `chf_dialog_click` — player · uuid · dialog · button · exit · current · inputs(키 → 글) · 프리필터 player(string) · dialog · button(macro)
+  - 왜: Figura 에는 글 입력 칸이 없다 — 하네스 본격플러팅강좌 «가상 인물 설정»(`design/가상인물_설정/plan.md` D1)
+  - ★ **ESC 로 닫아도 서버가 안다** — 1.21.8 클라 `DialogScreen.onClose` → `dialog.onCancel()`(= 나가기 버튼 동작) → 사용자 지정 클릭이면
+    `sendCustomAction`(javap 실측). 그래서 나가기 버튼도 사용자 지정 클릭으로 만들고, ESC 는 `exit: true` 로 온다
+  - ★ **동작 없는 버튼은 만들지 않는다** — 바닐라 `ActionButton` 의 동작은 선택이고, 없으면 누르는 순간 **패킷 없이** 닫힌다. 그래서 버튼마다 id 필수(없으면 FormatException)
+  - 클릭 payload 는 `"<seq>:<번호>"`(번호 -1 = 나가기) · 플레이어마다 최근 8장을 기억해 늦은 클릭도 풀어 준다(`current: false`)
+  - `PlayerCustomClickEvent` 는 채팅 글의 사용자 지정 클릭에도 온다 — 키 `chf:dialog` 만 넘긴다 · 메인 스레드가 아니면 스케줄러로 옮겨 부른다
+  - 새 다이얼로그는 옛 다이얼로그를 건너뛴 «이전 화면» 을 물려받는다(클라 `ClientCommonPacketListenerImpl.showDialog`) — 입력 창에서 ESC 면 게임으로 돌아간다
+  - 빌드 ⚠ `mvnw` 는 JDK 가 필요하다 — `JAVA_HOME` 이 JRE 면 «No compiler is provided» (이 PC: `C:\Program Files\Java\jdk-21`)
+
 ## 0.10.0
 
 - **추가** 이벤트 `player_stop_spectating`(player · target · target_type · target_name) — Paper `PlayerStopSpectatingEntityEvent` 래핑 · **취소 가능**

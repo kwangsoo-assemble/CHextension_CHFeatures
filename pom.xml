@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>kr.asmbl</groupId>
     <artifactId>chfeatures</artifactId>
-    <version>0.10.0</version>
+    <version>0.11.0</version>
     <name>CHFeatures</name>
     <description>Custom CommandHelper extension for Purpur 1.21.8 (Paper API)</description>
 

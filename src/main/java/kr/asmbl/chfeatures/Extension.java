@@ -9,7 +9,7 @@ import com.laytonsmith.core.extensions.MSExtension;
 @MSExtension("CHFeatures")
 public class Extension extends AbstractExtension {
 
-	private static final Version version = new SimpleVersion(0, 10, 0);
+	private static final Version version = new SimpleVersion(0, 11, 0);
 
 	@Override
 	public Version getVersion() {
@@ -28,6 +28,11 @@ public class Extension extends AbstractExtension {
 		} catch (Throwable ex) {
 			// 플러그인이 없거나 Bukkit 이 없는 환경
 		}
+		try {
+			DialogBridge.register(); // 바닐라 다이얼로그 클릭 (chf_dialog_click)
+		} catch (Throwable ex) {
+			// Bukkit 이 없는 환경 · 다이얼로그 API 가 없는 서버
+		}
 		Static.getLogger().info("CHFeatures " + getVersion() + " loaded.");
 	}
 
@@ -40,6 +45,11 @@ public class Extension extends AbstractExtension {
 		}
 		try {
 			FcBridge.unregister();
+		} catch (Throwable ex) {
+			// 등록된 적 없으면 무시
+		}
+		try {
+			DialogBridge.unregister();
 		} catch (Throwable ex) {
 			// 등록된 적 없으면 무시
 		}
