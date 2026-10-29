@@ -3,6 +3,11 @@
 버전은 `pom.xml` + `Extension.java`(SimpleVersion) 동기. 규칙은 CLAUDE.md의 "업데이트 규칙" 참고.
 (0.4.2 이전 이력은 소급 정리한 것 — 이후 버전부터는 업데이트 시점에 기록할 것)
 
+## 0.11.1
+
+- **고침** `chf_show_dialog` 가 버튼을 만들다 `IllegalArgumentException: Additions must be a compound tag` 로 죽던 것 — Paper 는 사용자 지정 클릭 payload 로 **compound 태그만** 받는다(`CustomClickActionImpl.<init>` · 서버 실측 2026-10-29).
+  payload 를 글자 태그 `"<seq>:<번호>"` 에서 `{c:"<seq>:<번호>"}` 로 바꾸고, 받을 때는 SNBT 글에서 `숫자:숫자` 를 정규식으로 뽑는다 · 0.11.0 은 다이얼로그가 한 번도 안 열렸다
+
 ## 0.11.0
 
 - **추가** 바닐라 다이얼로그(1.21.6+) 함수 셋 · 이벤트 하나 — Paper 다이얼로그 API(`@ApiStatus.Experimental`)는 `DialogBridge` 에만(격리) ·

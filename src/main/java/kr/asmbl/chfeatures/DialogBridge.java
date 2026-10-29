@@ -33,11 +33,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 바닐라 다이얼로그(1.21.6+) — Paper 다이얼로그 API(@ApiStatus.Experimental)는 이 클래스에만 둔다.
  *
- * 버튼 · 나가기 버튼은 전부 사용자 지정 클릭 "chf:dialog" 이고 payload 는 "<seq>:<번호>" 문자열이다
+ * 버튼 · 나가기 버튼은 전부 사용자 지정 클릭 "chf:dialog" 이고 payload 는 compound {c:"<seq>:<번호>"} 다
  * (번호 -1 = 나가기). 클라는 ESC 로 닫아도 나가기 동작을 보낸다(1.21.8 DialogScreen.onClose → onCancel) —
  * 그래서 서버가 닫힘을 안다. 동작 없는 버튼은 패킷 없이 닫히므로 만들지 않는다.
  *
@@ -46,6 +48,8 @@ import java.util.UUID;
 final class DialogBridge implements Listener {
 
 	private static final Key CLICK_KEY = Key.key("chf", "dialog");
+	/** payload {c:"<seq>:<번호>"} — Paper 는 사용자 지정 클릭 payload 로 compound 태그만 받는다(글자 태그면 IllegalArgumentException). */
+	private static final Pattern PAYLOAD = Pattern.compile("(\\d+):(-?\\d+)");
 	private static final int KEEP = 8;   // 늦은 클릭을 풀기 위해 플레이어마다 남기는 최근 장 수
 
 	private static final LegacyComponentSerializer LEGACY = LegacyComponentSerializer.legacySection();
@@ -151,7 +155,7 @@ final class DialogBridge implements Listener {
 	private static ActionButton button(DialogSpec.Button b, int seq, int index) {
 		ActionButton.Builder builder = ActionButton.builder(text(b.label))
 				.width(b.width)
-				.action(DialogAction.customClick(CLICK_KEY, BinaryTagHolder.binaryTagHolder("\"" + seq + ":" + index + "\"")));
+				.action(DialogAction.customClick(CLICK_KEY, BinaryTagHolder.binaryTagHolder("{c:\"" + seq + ":" + index + "\"}")));
 		if(b.tooltip != null) {
 			builder.tooltip(text(b.tooltip));
 		}
@@ -185,16 +189,15 @@ final class DialogBridge implements Listener {
 		if(tag == null) {
 			return;
 		}
-		String raw = tag.string().replace("\"", "");
-		int colon = raw.indexOf(':');
-		if(colon < 0) {
+		Matcher m = PAYLOAD.matcher(tag.string());
+		if(!m.find()) {
 			return;
 		}
 		int seq;
 		int index;
 		try {
-			seq = Integer.parseInt(raw.substring(0, colon));
-			index = Integer.parseInt(raw.substring(colon + 1));
+			seq = Integer.parseInt(m.group(1));
+			index = Integer.parseInt(m.group(2));
 		} catch (NumberFormatException ex) {
 			return;
 		}
