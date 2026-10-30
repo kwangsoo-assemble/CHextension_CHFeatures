@@ -3,6 +3,15 @@
 버전은 `pom.xml` + `Extension.java`(SimpleVersion) 동기. 규칙은 CLAUDE.md의 "업데이트 규칙" 참고.
 (0.4.2 이전 이력은 소급 정리한 것 — 이후 버전부터는 업데이트 시점에 기록할 것)
 
+## 0.12.0
+
+- **추가** `chf_collision_top(world, x1, y1, z1, x2, y2, z2)` → double 또는 null — 상자(축 정렬)와 겹치는 블록 **충돌 모양** 중 가장 높은 윗면 y · 안 겹치면 null
+  - 블록마다 Bukkit `Block.getCollisionShape().getBoundingBoxes()` 를 블록 자리로 옮겨 `BoundingBox.overlaps` 로 본다 — 반 블록 · 계단 · 문 · 열린 다락문 · 울타리 · 카펫이 실제 모양 그대로(닿기만 한 면은 겹침이 아니다)
+  - 왜: 코어 `get_block_info(loc, 'solid')` 는 `Material.isSolid` 라 반 블록 · 문 · 다락문까지 꽉 찬 칸으로 본다 — 하네스 본격플러팅강좌 지시봉 판넬 옮기기에서 «조작이 너무 불편» (🙋 FL101)
+  - 윗면 y 를 돌려주는 까닭: «겹치나» 와 «어디까지 올려 세우나(반 블록 위 0.5)» 를 한 번에 — 스크립트가 블록마다 묻지 않는다(틱마다 수십 번 → 몇 번)
+  - 안 읽힌 청크는 읽지 않고 막힌 것으로 본다(상자 꼭대기를 돌려준다) · 상자는 4096 블록까지(넘으면 RangeException)
+  - Bukkit 타입은 exec 안에서만(json-api 안전 — 핵심 제약 1)
+
 ## 0.11.1
 
 - **고침** `chf_show_dialog` 가 버튼을 만들다 `IllegalArgumentException: Additions must be a compound tag` 로 죽던 것 — Paper 는 사용자 지정 클릭 payload 로 **compound 태그만** 받는다(`CustomClickActionImpl.<init>` · 서버 실측 2026-10-29).

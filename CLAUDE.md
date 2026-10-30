@@ -43,7 +43,10 @@ GitHub `kwangsoo-assemble/CHextension_CHFeatures`(공개 · MIT · 2026-10-12) �
 4. 이벤트: Bukkit Listener는 ChfListener에 격리, @api AbstractEvent(ChfEvents)는 Bukkit 참조 0,
    Extension.onStartup에서 try/catch(Throwable) 등록. json-api엔 확장 이벤트 원래 미포함(정상)
 
-## 함수 인벤토리 (0.11.1 기준, 상세 이력은 CHANGELOG.md)
+## 함수 인벤토리 (0.12.0 기준, 상세 이력은 CHANGELOG.md)
+
+- 블록 충돌(0.12.0): `chf_collision_top(world, x1, y1, z1, x2, y2, z2)` → 상자와 겹치는 블록 충돌 모양의 가장 높은 윗면 y 또는 null —
+  실제 충돌 모양(반 블록 · 문 · 다락문 · 울타리) · 안 읽힌 청크는 막힘 · 4096 블록까지
 
 - 다이얼로그(0.11.0 · DialogBridge 격리 · Paper 실험 API): `chf_show_dialog(player, dialog)` · `chf_close_dialog(player)` ·
   `chf_get_dialog(player)` · 이벤트 `chf_dialog_click`(player/uuid/dialog/button/exit/current/inputs) — 버튼마다 id 필수

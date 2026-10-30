@@ -14,6 +14,7 @@ import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
@@ -1330,6 +1331,97 @@ public class Functions {
 					+ " Use null instead if you need an item to stay indefinitely."
 					+ " Throws IllegalArgumentException if the entity is not a dropped item"
 					+ " or if ticks is negative.";
+		}
+
+		@Override
+		public Version since() {
+			return MSVersion.V3_3_5;
+		}
+	}
+	@api
+	public static class chf_collision_top extends AbstractFunction {
+
+		@Override
+		public Class<? extends CREThrowable>[] thrown() {
+			return new Class[]{CRECastException.class, CREInvalidWorldException.class, CRERangeException.class};
+		}
+
+		@Override
+		public boolean isRestricted() {
+			return true;
+		}
+
+		@Override
+		public Boolean runAsync() {
+			return false;
+		}
+
+		@Override
+		public Mixed exec(Target t, Environment env, Mixed... args) throws ConfigRuntimeException {
+			World w = Bukkit.getWorld(args[0].val());
+			if(w == null) {
+				throw new CREInvalidWorldException("The specified world " + args[0].val() + " doesn't exist", t);
+			}
+			double x1 = ArgumentValidation.getDouble(args[1], t);
+			double y1 = ArgumentValidation.getDouble(args[2], t);
+			double z1 = ArgumentValidation.getDouble(args[3], t);
+			double x2 = ArgumentValidation.getDouble(args[4], t);
+			double y2 = ArgumentValidation.getDouble(args[5], t);
+			double z2 = ArgumentValidation.getDouble(args[6], t);
+			org.bukkit.util.BoundingBox box = new org.bukkit.util.BoundingBox(x1, y1, z1, x2, y2, z2);
+			int bx1 = (int) java.lang.Math.floor(box.getMinX());
+			int by1 = (int) java.lang.Math.floor(box.getMinY());
+			int bz1 = (int) java.lang.Math.floor(box.getMinZ());
+			int bx2 = (int) java.lang.Math.floor(box.getMaxX());
+			int by2 = (int) java.lang.Math.floor(box.getMaxY());
+			int bz2 = (int) java.lang.Math.floor(box.getMaxZ());
+			// 한 번에 너무 큰 상자는 서버를 멈춘다 — 판넬 · 엔티티 크기용
+			if((long) (bx2 - bx1 + 1) * (by2 - by1 + 1) * (bz2 - bz1 + 1) > 4096) {
+				throw new CRERangeException("The box is too large (more than 4096 blocks).", t);
+			}
+			double top = Double.NEGATIVE_INFINITY;
+			for(int x = bx1; x <= bx2; x++) {
+				for(int z = bz1; z <= bz2; z++) {
+					// ⚠ 안 읽힌 청크를 읽지 않는다 — 막힌 것으로 보고 상자 꼭대기를 돌려준다
+					if(!w.isChunkLoaded(x >> 4, z >> 4)) {
+						top = java.lang.Math.max(top, box.getMaxY());
+						continue;
+					}
+					for(int y = by1; y <= by2; y++) {
+						Block b = w.getBlockAt(x, y, z);
+						for(org.bukkit.util.BoundingBox part : b.getCollisionShape().getBoundingBoxes()) {
+							part.shift(x, y, z);
+							if(part.overlaps(box)) {
+								top = java.lang.Math.max(top, part.getMaxY());
+							}
+						}
+					}
+				}
+			}
+			if(top == Double.NEGATIVE_INFINITY) {
+				return CNull.NULL;
+			}
+			return new CDouble(top, t);
+		}
+
+		@Override
+		public String getName() {
+			return "chf_collision_top";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{7};
+		}
+
+		@Override
+		public String docs() {
+			return "double {world, x1, y1, z1, x2, y2, z2} Returns the highest top Y among the block collision shapes"
+					+ " that overlap the given axis-aligned box, or null if the box touches no collision shape."
+					+ " Uses each block's real collision shape (slabs, stairs, doors, open trapdoors, fences, carpets...),"
+					+ " not a full cube. Faces that only touch do not count as overlapping."
+					+ " Blocks in unloaded chunks count as colliding up to the box top (they are not loaded)."
+					+ " The box may cover at most 4096 blocks.";
 		}
 
 		@Override
